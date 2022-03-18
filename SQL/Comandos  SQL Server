@@ -1,0 +1,39 @@
+# Verifica si existe una tabla, y de no existir, la crea
+
+USE BD_ejejmplo
+IF OBJECT_ID('CatNatural') IS NULL
+	BEGIN
+    CREATE TABLE [CatNatural] 
+    (
+    [cat] nvarchar(255),
+    [ncat] float,
+	  )
+  END;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Crea dos tablas y sus relaciones a través de llaves principales y foráneas
+
+USE DB_PRUEBA
+CREATE TABLE PRODUCTOS(
+  ID_PRODUCTO INT not null PRIMARY KEY
+  ,NOMBRE VARCHAR(50)
+  ,PRECIO INT
+  ,FECHA_CURSE DATETIME 
+  ,ID_EJECUTIVO INT not null FOREIGN KEY REFERENCES EJECUTIVOS(ID_EJECUTIVO)
+  )
+
+CREATE TABLE EJECUTIVOS(
+ID_EJECUTIVO INT
+,PRIMARY KEY (ID_EJECUTIVO)
+,NOMBRE VARCHAR(50)
+,CIUDAD VARCHAR
+,FECHA_NAC DATETIME)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Ejecuta una inserción masiva de datos desde una máquina hacia una BBDD SQL Server, con separador de campos "," y con el 1er campo con encabezados.
+
+BULK ISERT Cliente
+FROM 'D:\Visual Studio\Repositorio_Curso_Integration_Services\Bases de datos\Clientes.csv'
+WITH(
+	FIRSTROW=2,
+	FIELDTERMINATOR =',',
+	ROWTERMINATOR ='\n'
+);
