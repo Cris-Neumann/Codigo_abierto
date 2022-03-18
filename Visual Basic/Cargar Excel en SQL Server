@@ -1,7 +1,5 @@
   # La 1era macro muestra el metodo para importar desde un archivo Excel a una BBDD SQL Server.
   # La 2da macro muestra el metodo para exportar desde una BBDD SQL Server a un archivo Excel.
-  # La 3era macro importa un TXT sin separar columnas
-  # La 4ta macro importa un TXT separando columnas
   
 Sub Inserta_data_en_SQL_Server()
 Dim con As ADODB.Connection, k As Double, i As Double
@@ -84,63 +82,3 @@ Dim j As Long
     cnn.Close
 End Sub
 
-Sub Importa_TXT_sin_separar_columnas()
-Dim Filtro As String
-Dim nFichero As Integer
-Dim i As Double
-Hoja2.Activate
-nFichero = FreeFile
-Filtro = " TXT(*.TXT),"
-txt = Application.GetOpenFilename(Filtro)
-'Ahora almacenaré cada fila del txt en la variable "datos"
-'y en cada interación voy copiando su contenido en hoja2.cells
-If txt <> Empty Then
-    Open txt For Input As nFichero
-        i = 0
-        Do While Not EOF(nFichero)
-            Line Input #nFichero, datos
-            i = i + 1
-            Hoja2.Cells(i, 1).Value = datos
-        Loop
-    Close nFichero
-End If
-End Sub
-
-Sub Importa_TXT_separando_columnas()
-Dim Filtro As String
-Dim nFichero As Integer
-Dim sCadena As Variant
-Dim i, j As Double
-nFichero = FreeFile
-Filtro = " TXT(*.TXT),"
-txt = Application.GetOpenFilename(Filtro)
-'Ahora almacenaré cada fila del txt en la variable "datos"
-'y en cada interación voy copiando su contenido en hoja2.cells
-If txt <> Empty Then
-Open txt For Input As nFichero
-i = 0
-Do While Not EOF(nFichero)
-Line Input #nFichero, datos
-i = i + 1
-'para extraer la información de cada línea de datos y entre cada espacio tabulado
-        '(puede ser otro tipo de separacion como por ej:
-        'sCadena = Split(datos, vbTab)tabulaciones
-        'sCadena = Split(datos," ")espacios
-        'sCadena = Split(datos, ",")comas
-        'sCadena = Split(datos,";")punto y coma)
-'usamos la función Split, en la detallamos que los datos están delimitados por 'tabulaciones "vbTab"
-'si estuviesen delimitados por espaciones, sería " " y por comas ","
-sCadena = Split(datos, vbTab)
-'delimitamos el tamaño de la matriz (linea de datos).
-fin = UBound(sCadena) + 1
-'mediante un bucle for - next vamos incorporando en cada fila de Excel (i) la 'información de cada linea del txt
-'y en cada columna (j) la información de cada espacio delimitado.
-For j = 1 To fin
-With Sheets(1)
-.Cells(i, j).Value = sCadena(j - 1)
-End With
-Next j
-Loop
-Close nFichero
-End If
-End Sub
