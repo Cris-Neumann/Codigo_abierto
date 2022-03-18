@@ -13,7 +13,7 @@ Dim nombre As String, apellido As String, rut As String
     Set con = New ADODB.Connection
     Set rs = New ADODB.Recordset
     con.Open "Provider=SQLOLEDB;Initial Catalog=BD_PRUEBA" & _                 ' "Catalog"  es la BBDD donde se importa la data
-    ";Data Source=CRISTIAN-PC\SQLEXPRESS;integrated security=SSPI;"            ' "Data Source"  es el servidor donde se importa la data
+    ";Data Source=CRISTIAN-PC\SQLEXPRESS;integrated security=SSPI;"            ' "Data Source" es la máquina/servidor donde se obtiene la data
         If con.State = 1 Then
             com.ActiveConnection = con
             com.CommandType = adCmdText
