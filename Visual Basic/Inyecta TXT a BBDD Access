@@ -1,0 +1,130 @@
+
+# La 1era macro inyecta un TXT hacia BBDD Access sin separadores, es decir, extrayendo campos por pososición y largo de cada campo.
+# La 2da macro inyecta un TXT hacia BBDD Access con separador coma (",") entre campos.
+
+Sub Inyecta_Texto_Plano_sin_separador_hacia_Access()
+Dim Conn As ADODB.Connection
+Dim MiConexion
+Dim Rs As ADODB.Recordset
+Dim MiBase As String
+MiBase = "Interbancaria_enviada.accdb"
+Set Conn = New ADODB.Connection
+MiConexion = Application.ThisWorkbook.Path & Application.PathSeparator & MiBase
+With Conn
+    .Provider = "Microsoft.ACE.OLEDB.12.0"
+    .Open MiConexion
+End With
+'Abro el recordset:
+Set Rs = New ADODB.Recordset
+Rs.CursorLocation = adUseServer
+'Llamo tabla de Access que llenaré:
+Rs.Open Source:="TEF_enviadas", _
+    ActiveConnection:=Conn, _
+    CursorType:=adOpenDynamic, _
+    LockType:=adLockOptimistic, _
+    Options:=adCmdTable
+'Abro el cuadro de dialogo para buscar el txt y relleno Access:
+Set fs = CreateObject("Scripting.FileSystemObject")
+Dim df As FileDialog
+Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.InitialFileName = ThisWorkbook.Path
+    fd.InitialView = msoFileDialogViewList
+    allowMultipleSelect = True
+    FileChosen = fd.Show
+    If fd.SelectedItems.COUNT Then
+        For i = 1 To fd.SelectedItems.COUNT
+                Set a = fs.OpenTextFile(fd.SelectedItems(i), 1)
+                num_linea = 0
+                Do While a.AtEndOfStream <> True
+                    linea = a.ReadLine
+                    If Mid(linea, 1, 20) = 27 Or Mid(linea, 1, 20) = 39 Then
+                        Rs.AddNew
+                        'Rs!ID = num_linea
+                        Rs!Bco_Originador = Trim(Mid(linea, 1, 20))
+                        Rs!Bco_Destino = Trim(Mid(linea, 21, 20))
+                        Rs!Cuenta_Origen = Trim(Mid(linea, 42, 21))
+                        Rs!Nombre_Origen = Trim(Mid(linea, 64, 20))
+                        Rs!RUT_Origen = Trim(Mid(linea, 87, 20))
+                        Rs!TIPO_Pago = Trim(Mid(linea, 112, 10))
+                        Rs!Código_de_Transaccion = Trim(Mid(linea, 123, 21))
+                        Rs!RUT_Destino = Trim(Mid(linea, 147, 28))
+                        Rs!Nombre_Destino = Trim(Mid(linea, 177, 22))
+                        Rs!Cuenta_Destino = Trim(Mid(linea, 200, 17))
+                        Rs!Monto = CDbl(Trim(Mid(linea, 218, 39)))
+                        Rs!Causal_Retorno = Trim(Mid(linea, 258, 14))
+                        Rs!Fecha_CARGA = CDate(Trim(Mid(linea, 279, 2)) & "/" & Trim(Mid(linea, 277, 2)) _
+                        & "/" & Trim(Mid(linea, 273, 4)))
+                        Rs.Update
+                        Rs.MoveLast
+                     End If
+                Loop
+                a.Close
+          Next i
+    MsgBox "Archivo(s) cargado(s) en Access con éxito"
+    Else
+        MsgBox "Procesamiento cancelado"
+    End If
+'Cierro la conexión ADODB y reseteo del recordset:
+Rs.Close
+Conn.Close
+Set Rs = Nothing
+Set Conn = Nothing
+End Sub
+
+Sub Inyecta_Texto_Plano_con_separador_"coma"_hacia_Access()
+Dim Conn As ADODB.Connection
+Dim MiConexion
+Dim Rs As ADODB.Recordset
+Dim MiBase As String
+MiBase = "Interbancaria_enviada.accdb"
+Set Conn = New ADODB.Connection
+MiConexion = Application.ThisWorkbook.Path & Application.PathSeparator & MiBase
+With Conn
+    .Provider = "Microsoft.ACE.OLEDB.12.0"
+    .Open MiConexion
+End With
+'Abro el recordset:
+Set Rs = New ADODB.Recordset
+Rs.CursorLocation = adUseServer
+'Llamo tabla de Access que llenaré:
+Rs.Open Source:="Segmentos_CRM", _
+    ActiveConnection:=Conn, _
+    CursorType:=adOpenDynamic, _
+    LockType:=adLockOptimistic, _
+    Options:=adCmdTable
+'Abro el cuadro de dialogo para buscar el txt y relleno Access:
+Set fs = CreateObject("Scripting.FileSystemObject")
+Dim df As FileDialog
+Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.InitialFileName = ThisWorkbook.Path
+    fd.InitialView = msoFileDialogViewList
+    allowMultipleSelect = True
+    FileChosen = fd.Show
+    If fd.SelectedItems.COUNT Then
+        For i = 1 To fd.SelectedItems.COUNT
+                Set a = fs.OpenTextFile(fd.SelectedItems(i), 1)
+                num_linea = 0
+                Do While a.AtEndOfStream <> True
+                    linea = a.ReadLine
+                    Lista_separada = Split(linea, ",")
+                    If IsNumeric(Lista_separada(0)) = True Then
+                        Rs.AddNew
+                        Rs!Rut = CDbl(Trim(Lista_separada(0)))
+                        Rs!Segmento = Trim(Lista_separada(1))
+                        Rs!Organizacion = Trim(Lista_separada(2))
+                        Rs.Update
+                        Rs.MoveLast
+                     End If
+                Loop
+                a.Close
+          Next i
+    MsgBox "Archivo(s) cargado(s) en Access con éxito"
+    Else
+        MsgBox "Procesamiento cancelado"
+    End If
+'Cierro la conexión ADODB y reseteo del recordset:
+Rs.Close
+Conn.Close
+Set Rs = Nothing
+Set Conn = Nothing
+End Sub
