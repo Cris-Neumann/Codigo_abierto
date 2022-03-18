@@ -1,0 +1,35 @@
+# Aplica formato "Nom propio" a las celdas seleccionadas  
+Sub Nom_propio()
+For Each Cell In Selection
+    Cell.Value = Application.WorksheetFunction.Proper(Cell.Value)
+Next Cell
+End Sub
+----------------------------------------------------------------------------------------------------------------
+
+# Tranforma a número las celdas seleccionadas (útil para aplicar antes de un "Buscarv" automatico)
+Sub Transforma_a_double()
+    On Error GoTo salto
+For Each i In Selection
+    i.Value = CDbl(i.Value)
+Next i
+salto:
+End Sub
+
+----------------------------------------------------------------------------------------------------------------
+# Funcion que obtiene el dígito verificador para cualquier Rut in DV
+Function dvrut(rut)
+    ' lo unico que no acepta son letras ---------- obtiene el digito verificador
+    rut = Replace("0000" & rut, ".", "", 1)
+    If InStr(1, rut, "-") > 0 Then rut = Left(rut, InStr(1, rut, "-") - 1)
+    rut = Right(rut, 8)
+    suma = 0
+    For i = 1 To 8
+        suma = suma + Val(Mid(rut, i, 1)) * Val(Mid("32765432", i, 1))
+    Next i
+    dv = 11 - (suma Mod 11)
+    If dv = 10 Then dv = "k"
+    If dv = 11 Then dv = 0
+    dvrut = dv
+End Function
+
+----------------------------------------------------------------------------------------------------------------
