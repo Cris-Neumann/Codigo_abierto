@@ -1,0 +1,69 @@
+# La macro inyecta TXT a BBDD SQL Server sin separador "simbolo" entre campos, es decir, extrayendo cada campo según su posicion y largo de campo.
+
+Sub Procesa_TXT()
+Dim Conn As ADODB.Connection
+Dim com As New ADODB.Command
+Dim MiConexion
+Dim Rs As ADODB.Recordset
+Dim MiBase As String
+Set Conn = Nothing
+Set Rs = Nothing
+'Abro la conexión:
+Set Conn = New ADODB.Connection
+'Abro el recordset:
+Set Rs = New ADODB.Recordset ' Este se usa solo para lectura
+Conn.Open "Provider=SQLOLEDB;Initial Catalog=Interbancaria_enviada" & _
+";Data Source=L8C47BE190553\SQLEXPRESS;integrated security=SSPI;"
+    If Conn.State = 1 Then
+        com.ActiveConnection = Conn
+        com.CommandType = adCmdText
+    Else
+        MsgBox "No se pudo conectar a la Base de Datos"
+        End
+    End If
+'Abro el cuadro de dialogo para buscar el txt y relleno SQL Server:
+Set fs = CreateObject("Scripting.FileSystemObject")
+Dim df As FileDialog
+Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.InitialFileName = ThisWorkbook.Path
+    fd.InitialView = msoFileDialogViewList
+    allowMultipleSelect = True
+    FileChosen = fd.Show
+    If fd.SelectedItems.COUNT Then
+        For i = 1 To fd.SelectedItems.COUNT
+                Set a = fs.OpenTextFile(fd.SelectedItems(i), 1)
+                num_linea = 0
+                Do While a.AtEndOfStream <> True
+                    linea = a.ReadLine
+                    If Mid(linea, 1, 20) = 27 Or Mid(linea, 1, 20) = 39 Then
+                        'Rs!ID = num_linea
+                        Bco_Originador = Trim(Mid(linea, 1, 20))
+                        Bco_Destino = Trim(Mid(linea, 21, 20))
+                        Cuenta_Origen = Trim(Mid(linea, 42, 21))
+                        Nombre_Origen = Trim(Mid(linea, 64, 20))
+                        RUT_Origen = Trim(Mid(linea, 87, 20))
+                        TIPO_Pago = Trim(Mid(linea, 112, 10))
+                        Código_de_Transaccion = Trim(Mid(linea, 123, 21))
+                        RUT_Destino = Trim(Mid(linea, 147, 28))
+                        Nombre_Destino = Trim(Mid(linea, 177, 22))
+                        Cuenta_Destino = Trim(Mid(linea, 200, 17))
+                        Monto = CDbl(Trim(Mid(linea, 218, 39)))
+                        Causal_Retorno = Trim(Mid(linea, 258, 14))
+                        Fecha_CARGA = CDate(Trim(Mid(linea, 279, 2)) & "/" & Trim(Mid(linea, 277, 2)) _
+                        & "/" & Trim(Mid(linea, 273, 4)))
+                        com.CommandText = "INSERT INTO Creditos_enviados (Bco_Originador,Bco_Destino,Cuenta_Origen,Nombre_Origen,RUT_Origen,TIPO_Pago,Código_de_Transaccion,RUT_Destino,Nombre_Destino,Cuenta_Destino,Monto,Causal_Retorno,Fecha_CARGA)" & _
+                        "values ('" & Bco_Originador & "', '" & Bco_Destino & "', '" & Cuenta_Origen & "', '" & Nombre_Origen & "', '" & RUT_Origen & "', '" & TIPO_Pago & "', '" & Código_de_Transaccion & "', '" & RUT_Destino & "', '" & Nombre_Destino & "', '" & Cuenta_Destino & "', '" & Monto & "', '" & Causal_Retorno & "', '" & Fecha_CARGA & "')"
+                        ' Ejecución de la Query SQL anterior
+                        com.Execute
+                     End If
+                Loop
+                a.Close
+          Next i
+    MsgBox "Archivo(s) cargado(s) en SQL Server con éxito"
+    Else
+        MsgBox "Procesamiento cancelado"
+    End If
+Conn.Close
+Set Rs = Nothing
+Set Conn = Nothing
+End Sub
