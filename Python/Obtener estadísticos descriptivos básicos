@@ -1,4 +1,4 @@
-# Creamos un diccioario de prueba y lo convertimos en Dataframe
+# Creamos un diccionario de prueba y lo convertimos en Dataframe
 import pandas as pd
 import numpy as np
 d = {
